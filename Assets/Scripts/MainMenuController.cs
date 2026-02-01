@@ -6,43 +6,66 @@ public class MainMenuController : MonoBehaviour
     public GameObject mainMenuCanvas;
     public GameObject gameCanvas;
 
-    public static bool isVsAI = false;
-    public static string playerSide = "X"; // Defaults to X
-
     [Header("Panels")]
     public GameObject sideSelectionPanel;
+
+    // NOTE: We removed 'isVsAI' and 'playerSide' 
+    // The Menu now talks directly to the Game Controller's static settings.
 
     void Start()
     {
         // Ensure menu is on and game is off when we hit Play
         mainMenuCanvas.SetActive(true);
         gameCanvas.SetActive(false);
+        sideSelectionPanel.SetActive(false);
     }
 
+    // --- BUTTON FUNCTIONS ---
+
+    // 1. Player vs Player
     public void OnPvPButton()
     {
-        isVsAI = false;
+        // Set both players to Human
+        TicTacToeController.playerXType = PlayerType.Human;
+        TicTacToeController.playerOType = PlayerType.Human;
+
         StartGame();
     }
 
+    // Opens the panel where we choose X, O, or Watch AI
     public void OnPvAI_OpenPanel()
     {
         sideSelectionPanel.SetActive(true);
     }
 
+    // 2. Player vs AI (Player is X)
     public void OnChooseX()
     {
-        isVsAI = true;
-        playerSide = "X";
-        sideSelectionPanel.SetActive(false); // Hide panel
+        TicTacToeController.playerXType = PlayerType.Human;
+        TicTacToeController.playerOType = PlayerType.AI;
+
+        sideSelectionPanel.SetActive(false);
         StartGame();
     }
 
+    // 3. Player vs AI (Player is O)
     public void OnChooseO()
     {
-        isVsAI = true;
-        playerSide = "O";
-        sideSelectionPanel.SetActive(false); // Hide panel
+        TicTacToeController.playerXType = PlayerType.AI;
+        TicTacToeController.playerOType = PlayerType.Human;
+
+        sideSelectionPanel.SetActive(false);
+        StartGame();
+    }
+
+    // 4. AI vs AI (Watcher Mode)
+    // Hook this up to your new button in the Side Selection Panel
+    public void OnAIvsAI()
+    {
+        TicTacToeController.playerXType = PlayerType.AI;
+        TicTacToeController.playerOType = PlayerType.AI;
+
+        sideSelectionPanel.SetActive(false);
         StartGame();
     }
 
@@ -51,13 +74,12 @@ public class MainMenuController : MonoBehaviour
         sideSelectionPanel.SetActive(false);
     }
 
+    // --- SYSTEM FUNCTIONS ---
+
     void StartGame()
     {
-        // Swap the canvases
         mainMenuCanvas.SetActive(false);
         gameCanvas.SetActive(true);
-
-        // TODO: Inform the GameController to reset the board
     }
 
     public void OnSettingsButton()
@@ -69,7 +91,6 @@ public class MainMenuController : MonoBehaviour
     {
         Application.Quit();
 
-        // This allows us to quit even when testing in the Unity Editor
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #endif

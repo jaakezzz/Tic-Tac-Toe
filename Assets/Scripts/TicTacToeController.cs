@@ -3,8 +3,14 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
+public enum PlayerType { Human, AI }
+
 public class TicTacToeController : MonoBehaviour
 {
+    [Header("Game Settings")]
+    public static PlayerType playerXType = PlayerType.Human;
+    public static PlayerType playerOType = PlayerType.AI;
+
     [Header("UI References")]
     public GameObject[] gridButtons; // Drag all 9 buttons here in order
     public Image statusImage;
@@ -19,8 +25,8 @@ public class TicTacToeController : MonoBehaviour
     public Sprite drawSprite;
 
     [Header("Assets")]
-    public Sprite xSprite; 
-    public Sprite oSprite; 
+    public Sprite xSprite;
+    public Sprite oSprite;
 
     // Internal State
     private string[] boardState = new string[9]; // Tracks "X", "O", or ""
@@ -51,21 +57,14 @@ public class TicTacToeController : MonoBehaviour
         // If game is over or cell is already taken, ignore click
         if (!gameActive || boardState[index] != "") return;
 
-        if (MainMenuController.isVsAI)
-        {
-            // Only lock the input if it is NOT coming from the AI
-            if (!fromAI)
-            {
-                bool isMyTurn = (MainMenuController.playerSide == "X" && isPlayerXTurn) ||
-                                (MainMenuController.playerSide == "O" && !isPlayerXTurn);
+        // Check if the current player is actually a Human
+        PlayerType currentType = isPlayerXTurn ? playerXType : playerOType;
 
-                if (!isMyTurn)
-                {
-                    // Deselect the button so it doesn't get stuck looking "clicked"
-                    EventSystem.current.SetSelectedGameObject(null);
-                    return; // Block the human
-                }
-            }
+        // If it's an AI turn, but a Human clicked... BLOCK IT.
+        if (currentType == PlayerType.AI && !fromAI)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+            return;
         }
 
         // 1. Update Internal Data
@@ -87,7 +86,7 @@ public class TicTacToeController : MonoBehaviour
             gameActive = false;
             statusImage.sprite = (currentPlayer == "X") ? xWinSprite : oWinSprite;
             HighlightWinLine(currentPlayer);
-            
+
             // Disable all buttons so no more highlighting occurs
             foreach (GameObject btn in gridButtons)
             {
@@ -112,23 +111,9 @@ public class TicTacToeController : MonoBehaviour
 
         // 5. Switch Turn
         isPlayerXTurn = !isPlayerXTurn;
-        //string nextPlayer = isPlayerXTurn ? "X" : "O";
         statusImage.sprite = isPlayerXTurn ? xTurnSprite : oTurnSprite;
 
-        // 6. Trigger AI if needed
-        if (MainMenuController.isVsAI && gameActive)
-        {
-            // AI plays if:
-            // - Player chose X, but it's now O's turn
-            // - Player chose O, but it's now X's turn
-            bool isAITurn = (MainMenuController.playerSide == "X" && !isPlayerXTurn) ||
-                            (MainMenuController.playerSide == "O" && isPlayerXTurn);
-
-            if (isAITurn)
-            {
-                Invoke("PerformAIMove", 0.5f);
-            }
-        }
+        CheckForAITurn();
     }
 
     bool CheckWin(string player)
@@ -179,6 +164,9 @@ public class TicTacToeController : MonoBehaviour
 
     public void OnBackButtonClicked()
     {
+        CancelInvoke(); // Stop the AI if it is mid-calculation
+        gameActive = false;
+
         gameCanvas.SetActive(false);
         mainMenuCanvas.SetActive(true);
     }
@@ -209,101 +197,38 @@ public class TicTacToeController : MonoBehaviour
             gridButtons[i].GetComponent<Button>().interactable = true;
         }
 
-        // Check if AI needs to make the first move
-        if (MainMenuController.isVsAI && MainMenuController.playerSide == "O")
-        {
-            // AI is X, so it goes first!
-            Invoke("PerformAIMove", 0.5f);
-        }
+        CheckForAITurn();
     }
 
 
     // --- AI LOGIC ---
 
-    public void PerformAIMove()
+    void CheckForAITurn()
     {
-        int bestScore = int.MinValue;
-        int bestMove = -1;
+        if (!gameActive) return;
 
-        // 1. Determine who is who based on the player's choice
-        string aiSymbol = (MainMenuController.playerSide == "X") ? "O" : "X";
-        string humanSymbol = (MainMenuController.playerSide == "X") ? "X" : "O";
+        PlayerType nextType = isPlayerXTurn ? playerXType : playerOType;
 
-        for (int i = 0; i < 9; i++)
+        if (nextType == PlayerType.AI)
         {
-            if (boardState[i] == "")
-            {
-                // 2. AI places ITS OWN symbol (not always "O")
-                boardState[i] = aiSymbol;
-
-                // 3. Run Minimax passing the correct symbols
-                // We pass 'false' because the next turn is the Human's (Minimizer)
-                int score = Minimax(boardState, 0, false, aiSymbol, humanSymbol);
-
-                // Undo
-                boardState[i] = "";
-
-                if (score > bestScore)
-                {
-                    bestScore = score;
-                    bestMove = i;
-                }
-            }
+            // Add a small delay so we can see the moves happen
+            Invoke("ExecuteAI", 0.5f);
         }
+    }
 
+    void ExecuteAI()
+    {
+        // 1. Determine symbols
+        string aiSymbol = isPlayerXTurn ? "X" : "O";
+        string humanSymbol = isPlayerXTurn ? "O" : "X"; // (Opponent symbol)
+
+        // 2. Ask the AI script for the move
+        int bestMove = TicTacToeAI.GetBestMove(boardState, aiSymbol, humanSymbol);
+
+        // 3. Execute
         if (bestMove != -1)
         {
             OnCellClicked(bestMove, true);
         }
-    }
-
-    // Now accepts aiSym and humSym to know who is winning/losing
-    int Minimax(string[] board, int depth, bool isMaximizing, string aiSym, string humSym)
-    {
-        // Dynamic Check: Did the AI win? or the Human?
-        if (CheckWin(aiSym)) return 10 - depth; // Good for AI
-        if (CheckWin(humSym)) return depth - 10; // Bad for AI
-        if (IsBoardFull()) return 0;
-
-        if (isMaximizing)
-        {
-            int bestScore = int.MinValue;
-            for (int i = 0; i < 9; i++)
-            {
-                if (board[i] == "")
-                {
-                    board[i] = aiSym; // AI's turn
-                    int score = Minimax(board, depth + 1, false, aiSym, humSym);
-                    board[i] = "";
-                    bestScore = Mathf.Max(score, bestScore);
-                }
-            }
-            return bestScore;
-        }
-        else // Minimizing (Human's turn)
-        {
-            int bestScore = int.MaxValue;
-            for (int i = 0; i < 9; i++)
-            {
-                if (board[i] == "")
-                {
-                    board[i] = humSym; // Human's turn
-                    int score = Minimax(board, depth + 1, true, aiSym, humSym);
-                    board[i] = "";
-                    bestScore = Mathf.Min(score, bestScore);
-                }
-            }
-            return bestScore;
-        }
-    }
-
-    // Helper for the AI to check for draws
-    bool IsBoardFull()
-    {
-        foreach (string s in boardState)
-        {
-            if (s == "") return false;
-        }
-        return true;
     }
 }
