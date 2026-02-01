@@ -9,9 +9,6 @@ public class MainMenuController : MonoBehaviour
     [Header("Panels")]
     public GameObject sideSelectionPanel;
 
-    // NOTE: We removed 'isVsAI' and 'playerSide' 
-    // The Menu now talks directly to the Game Controller's static settings.
-
     void Start()
     {
         // Ensure menu is on and game is off when we hit Play
@@ -59,7 +56,6 @@ public class MainMenuController : MonoBehaviour
     }
 
     // 4. AI vs AI (Watcher Mode)
-    // Hook this up to your new button in the Side Selection Panel
     public void OnAIvsAI()
     {
         TicTacToeController.playerXType = PlayerType.AI;
