@@ -8,6 +8,7 @@ public static class TicTacToeAI
     {
         int bestScore = int.MinValue;
         int bestMove = -1;
+        int tieCount = 0;
 
         for (int i = 0; i < 9; i++)
         {
@@ -21,6 +22,17 @@ public static class TicTacToeAI
                 {
                     bestScore = score;
                     bestMove = i;
+                    tieCount = 1;
+                }
+                else if (score == bestScore)
+                {
+                    tieCount++;
+
+                    // Randomly replace the current best move with equal chance
+                    if (UnityEngine.Random.Range(0, tieCount) == 0)
+                    {
+                        bestMove = i;
+                    }
                 }
             }
         }
