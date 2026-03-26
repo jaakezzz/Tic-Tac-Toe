@@ -22,7 +22,7 @@ public static class TicTacToeAI
                 {
                     bestScore = score;
                     bestMove = i;
-                    tieCount = 1;
+                    tieCount = 1; // Reset tie count for new best score
                 }
                 else if (score == bestScore)
                 {

@@ -72,6 +72,9 @@ public class TicTacToeController : MonoBehaviour
         boardState[index] = currentPlayer;
         moveCount++;
 
+        // Play sound effect before updating visuals so it feels more responsive
+        AudioManager.Instance.PlayPlacePiece();
+
         // 2. Update Visuals
         // Get the Image component from the CHILD object
         Image btnImage = gridButtons[index].transform.GetChild(1).GetComponent<Image>();
@@ -83,6 +86,7 @@ public class TicTacToeController : MonoBehaviour
         // 3. Check Win Condition
         if (CheckWin(currentPlayer))
         {
+            AudioManager.Instance.PlayWin();
             gameActive = false;
             statusImage.sprite = (currentPlayer == "X") ? xWinSprite : oWinSprite;
             HighlightWinLine(currentPlayer);
@@ -98,6 +102,7 @@ public class TicTacToeController : MonoBehaviour
         // 4. Check Draw
         if (moveCount >= 9)
         {
+            AudioManager.Instance.PlayDraw();
             gameActive = false;
             statusImage.sprite = drawSprite;
 
@@ -165,6 +170,11 @@ public class TicTacToeController : MonoBehaviour
     public void OnBackButtonClicked()
     {
         CancelInvoke(); // Stop the AI if it is mid-calculation
+
+        // switch music back to menu track
+        AudioManager.Instance.PlayClick();
+        AudioManager.Instance.PlayMenuMusic();
+
         gameActive = false;
 
         gameCanvas.SetActive(false);
@@ -230,5 +240,12 @@ public class TicTacToeController : MonoBehaviour
         {
             OnCellClicked(bestMove, true);
         }
+    }
+
+    // --- UI BUTTONS ---
+    public void OnResetButtonClickedUI()
+    {
+        AudioManager.Instance.PlayClick();
+        ResetGame();
     }
 }

@@ -8,6 +8,7 @@ public class MainMenuController : MonoBehaviour
 
     [Header("Panels")]
     public GameObject sideSelectionPanel;
+    public GameObject settingsPanel;
 
     void Start()
     {
@@ -22,6 +23,7 @@ public class MainMenuController : MonoBehaviour
     // 1. Player vs Player
     public void OnPvPButton()
     {
+        AudioManager.Instance.PlayClick();
         // Set both players to Human
         TicTacToeController.playerXType = PlayerType.Human;
         TicTacToeController.playerOType = PlayerType.Human;
@@ -32,12 +34,14 @@ public class MainMenuController : MonoBehaviour
     // Opens the panel where we choose X, O, or Watch AI
     public void OnPvAI_OpenPanel()
     {
+        AudioManager.Instance.PlayClick();
         sideSelectionPanel.SetActive(true);
     }
 
     // 2. Player vs AI (Player is X)
     public void OnChooseX()
     {
+        AudioManager.Instance.PlayClick();
         TicTacToeController.playerXType = PlayerType.Human;
         TicTacToeController.playerOType = PlayerType.AI;
 
@@ -48,6 +52,7 @@ public class MainMenuController : MonoBehaviour
     // 3. Player vs AI (Player is O)
     public void OnChooseO()
     {
+        AudioManager.Instance.PlayClick();
         TicTacToeController.playerXType = PlayerType.AI;
         TicTacToeController.playerOType = PlayerType.Human;
 
@@ -58,6 +63,7 @@ public class MainMenuController : MonoBehaviour
     // 4. AI vs AI (Watcher Mode)
     public void OnAIvsAI()
     {
+        AudioManager.Instance.PlayClick();
         TicTacToeController.playerXType = PlayerType.AI;
         TicTacToeController.playerOType = PlayerType.AI;
 
@@ -65,25 +71,45 @@ public class MainMenuController : MonoBehaviour
         StartGame();
     }
 
-    public void OnCancelSideSelection()
+    public void OnBackToMain()
     {
-        sideSelectionPanel.SetActive(false);
+        AudioManager.Instance.PlayClick();
+        if (sideSelectionPanel) sideSelectionPanel.SetActive(false);
+        if (settingsPanel) settingsPanel.SetActive(false);
+    }
+
+    public void OnSettingsButton()
+    {
+        AudioManager.Instance.PlayClick();
+        settingsPanel.SetActive(true);
+    }
+
+    public void OnQuitButton()
+    {
+        // 1. Play the sound immediately
+        AudioManager.Instance.PlayClick();
+
+        // 2. Vaporize the mouse
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+
+        // 3. Nuke the Event System (guarantees no UI can be interacted with)
+        UnityEngine.EventSystems.EventSystem.current.enabled = false;
+
+        // 4. Delay the actual quit command to allow the sound to play
+        Invoke("ExecuteQuit", 0.35f);
     }
 
     // --- SYSTEM FUNCTIONS ---
 
     void StartGame()
     {
+        AudioManager.Instance.PlayGameMusic(); // SWITCH MUSIC
         mainMenuCanvas.SetActive(false);
         gameCanvas.SetActive(true);
     }
 
-    public void OnSettingsButton()
-    {
-        Debug.Log("Settings clicked! (To be implemented)");
-    }
-
-    public void OnQuitButton()
+    private void ExecuteQuit()
     {
         Application.Quit();
 
