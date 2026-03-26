@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: beee7e65a87176a498a3916c52f5de7d
+guid: f31636e29f0e76e4992e97d69f2f2067
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5168172306165712164
-    second: mouse-board-games_0
+      213: -6379896390239170496
+    second: mouse-shadowed_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -24,7 +24,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: mouse-board-games_0
+      name: mouse-shadowed_0
       rect:
         serializedVersion: 2
-        x: 22
-        y: 83
-        width: 984
-        height: 840
+        x: 0
+        y: 0
+        width: 451
+        height: 460
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 425c40f845909b740800000000000000
-      internalID: 5168172306165712164
+      spriteID: 0405ff3090e0677a0800000000000000
+      internalID: -6379896390239170496
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      mouse-board-games_0: 5168172306165712164
+      mouse-shadowed_0: -6379896390239170496
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

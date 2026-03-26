@@ -23,6 +23,10 @@ public class AudioManager : MonoBehaviour
 
     void Awake()
     {
+        // --- Global Framerate Failsafe ---
+        // Caps the game at 60 FPS if the player has VSync turned off in their graphics driver.
+        Application.targetFrameRate = 60;
+
         // Standard Singleton Pattern to ensure only one AudioManager exists
         if (Instance == null)
         {

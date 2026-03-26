@@ -1,25 +1,25 @@
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class CursorPreview : MonoBehaviour
 {
-    [SerializeField] private Texture2D cursorTexture;
-    [SerializeField] private Vector2 hotspot = Vector2.zero;
+    [Header("Software Cursor Setup")]
+    public Image customCursorImage;
 
     private void Start()
     {
-        ApplyCursor();
-    }
-
-    private void OnApplicationFocus(bool hasFocus)
-    {
-        if (hasFocus)
-            ApplyCursor();
-    }
-
-    private void ApplyCursor()
-    {
-        Cursor.visible = true;
+        // Hide the actual Windows/Mac hardware cursor
+        Cursor.visible = false;
         Cursor.lockState = CursorLockMode.None;
-        Cursor.SetCursor(cursorTexture, hotspot, CursorMode.Auto);
+    }
+
+    private void LateUpdate()
+    {
+        // 2. We check if a mouse actually exists, then grab its position the modern way
+        if (customCursorImage != null && Mouse.current != null)
+        {
+            customCursorImage.transform.position = Mouse.current.position.ReadValue();
+        }
     }
 }
